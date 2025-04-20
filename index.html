@@ -101,7 +101,7 @@
   document.querySelectorAll(".tile").forEach((tile, index) => {
     let angle = parseInt(tile.dataset.angle);
     currentAngles[index] = angle;
-    tile.style.transform = `rotate(${angle}deg)`;
+   tile.style.transition = "transform 0.2s";  // Átmeneti animáció, ha zökkenőmentesebb a forgatás
 
     tile.addEventListener("click", () => {
   if (completed) return;
