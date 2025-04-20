@@ -114,10 +114,13 @@
       clickCount++;
       clicksDisplay.textContent = "Kattintások: " + clickCount;
 
-      angle = (angle + 90) % 360;
-      currentAngles[index] = angle;
-      tile.dataset.angle = angle;
-      tile.style.transform = `rotate(${angle}deg)`;
+      tileStates[index].rotation += 90;
+  tile.style.transform = `rotate(${tileStates[index].rotation}deg)`;
+  tile.dataset.angle = tileStates[index].rotation % 360;
+
+  const allCorrect = tileStates.every(t => t.rotation % 360 === 0);
+  ...
+});
 
       const allCorrect = currentAngles.every(a => a === 0);
       const status = document.getElementById("status");
