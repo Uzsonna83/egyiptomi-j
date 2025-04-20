@@ -104,22 +104,26 @@
     tile.style.transform = `rotate(${angle}deg)`;
 
     tile.addEventListener("click", () => {
-      if (completed) return;
+  if (completed) return;
 
-      if (!started) {
-        started = true;
-        startTimer();
-      }
+  if (!started) {
+    started = true;
+    startTimer();
+  }
 
-      clickCount++;
-      clicksDisplay.textContent = "Kattintások: " + clickCount;
+  clickCount++;
+  clicksDisplay.textContent = "Kattintások: " + clickCount;
 
-      tileStates[index].rotation += 90;
-  tile.style.transform = `rotate(${tileStates[index].rotation}deg)`;
-  tile.dataset.angle = tileStates[index].rotation % 360;
+  // Forgatás: csak 90°-os lépésekkel
+  tileStates[index].rotation = (tileStates[index].rotation + 90) % 360;  // Csak 90°-t ad hozzá
+  tile.style.transform = `rotate(${tileStates[index].rotation}deg)`;  // Alkalmazza a forgatást
+  tile.dataset.angle = tileStates[index].rotation;  // Eltárolja az új szöget
 
-  const allCorrect = tileStates.every(t => t.rotation % 360 === 0);
-  ...
+  // Ellenőrzés: Ha minden darab a helyén van (0°)
+  const allCorrect = tileStates.every(t => t.rotation === 0);
+  if (allCorrect) {
+    showCongratulations();
+  }
 });
 
       const allCorrect = currentAngles.every(a => a === 0);
