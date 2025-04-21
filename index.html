@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Forgatható Puzzle</title>
+<style>
+  body {
+    background: #f4f4dc;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 600px;
+    margin: 0;
+  }
+  #puzzle {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    grid-gap: 2px;
+    justify-content: center;
+  }
+  .tile {
+    width: 80px;
+    height: 80px;
+    transition: transform 0.2s linear;
+    cursor: pointer;
+  }
+  h2 {
+    margin-bottom: 10px;
+  }
+  #status {
+    font-size: 1.6em;
+    color: green;
+    margin-top: 10px;
+    text-align: center;
+  }
+  #timer, #clicks {
+    font-size: 1.2em;
+    margin: 5px;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+
+<h2>A kis képkockák kattintásra jobbra fordulnak. Fordítsd mindegyiket a helyére, hogy kirakd a nagy képet!</h2>
+<p id="instruction" style="margin: 0; font-weight: bold;">A feladatra 3 perced van.</p>
+<div id="timer">Hátralévő idő: 3:00</div>
+<div id="clicks">Kattintások: 0</div>
+<div id="puzzle">
+<!-- Itt lennének a csempeképek beillesztve a végső verzióhoz -->
+</div>
+
+<p id="status"></p>
+
+<audio id="successSound">
+  <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" type="audio/ogg">
+</audio>
+
+<script>
+  const tileStates = [];
+  let completed = false;
+  let started = false;
+  let clickCount = 0;
+  let interval = null;
+
+  const timerDisplay = document.getElementById("timer");
+  const clicksDisplay = document.getElementById("clicks");
+  const status = document.getElementById("status");
+
+  function startTimer() {
+    let remaining = 180;
+    interval = setInterval(() => {
+      if (remaining <= 0) {
+        clearInterval(interval);
+        completed = true;
+        status.style.color = "darkred";
+        status.style.fontSize = "1.8em";
+        status.textContent = "Letelt az idő!";
+        document.querySelectorAll(".tile").forEach(tile => {
+          tile.style.pointerEvents = "none";
+          tile.style.cursor = "default";
+        });
+        return;
+      }
+      const minutes = Math.floor(remaining / 60);
+      const seconds = remaining % 60;
+      timerDisplay.textContent = "Hátralévő idő: " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      remaining--;
+    }, 1000);
+  }
+
+  document.querySelectorAll(".tile").forEach((tile, index) => {
+    const initial = parseInt(tile.dataset.angle);
+    tileStates[index] = {
+      rotation: initial
+    };
+    tile.style.transform = `rotate(${tileStates[index].rotation}deg)`;
+
+    tile.addEventListener("click", () => {
+      if (completed) return;
+
+      if (!started) {
+        started = true;
+        startTimer();
+      }
+
+      clickCount++;
+      clicksDisplay.textContent = "Kattintások: " + clickCount;
+
+      tileStates[index].rotation += 90;
+      tile.style.transform = `rotate(${tileStates[index].rotation}deg)`;
+      tile.dataset.angle = tileStates[index].rotation % 360;
+
+      const allCorrect = tileStates.every(t => t.rotation % 360 === 0);
+      if (allCorrect) {
+        completed = true;
+        clearInterval(interval);
+        const elapsed = 180 - (parseInt(timerDisplay.textContent.split(":")[1]) + 60 * parseInt(timerDisplay.textContent.split(":")[0].replace(/\D/g, "")));
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const timeText = (minutes > 0 ? minutes + " perc " : "") + (seconds > 0 ? seconds + " másodperc" : "");
+        status.style.color = "black";
+        status.style.fontSize = "1.8em";
+        status.textContent = "Gratulálok! A kirakást " + timeText + " alatt, " + clickCount + " kattintással oldottad meg!";
+        document.getElementById("successSound").play();
+      } else {
+        status.textContent = "";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
